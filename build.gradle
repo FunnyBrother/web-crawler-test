@@ -1,0 +1,50 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '2.2.4.RELEASE'
+    id 'io.spring.dependency-management' version '1.0.9.RELEASE'
+}
+
+group = 'com.rusnak.dim'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '11'
+
+ext {
+    springBootVersion = "2.2.4.RELEASE"
+    loombokVersion = '1.18.12'
+    jsoupVersion = '1.12.2'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencyManagement {
+    imports {
+        mavenBom("org.springframework.boot:spring-boot-dependencies:${springBootVersion}")
+    }
+}
+
+dependencies {
+    annotationProcessor "org.springframework.boot:spring-boot-configuration-processor:${springBootVersion}"
+    annotationProcessor "org.projectlombok:lombok:${loombokVersion}"
+
+    implementation "org.springframework.boot:spring-boot-starter"
+    implementation "org.springframework.boot:spring-boot-starter-web"
+    implementation "org.springframework.boot:spring-boot-starter-websocket"
+
+    implementation "org.jsoup:jsoup:${jsoupVersion}"
+
+    implementation "org.projectlombok:lombok:${loombokVersion}"
+
+    testImplementation "org.projectlombok:lombok:${loombokVersion}"
+
+    testImplementation('org.springframework.boot:spring-boot-starter-test') {
+        exclude group: 'org.junit.vintage:junit-vintage-engine'
+    }
+
+    testAnnotationProcessor "org.projectlombok:lombok:${loombokVersion}"
+}
+
+test {
+    useJUnitPlatform()
+}
