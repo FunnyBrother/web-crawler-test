@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Hello WebSocket</title>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.js"></script>
+    <script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
+    <script type="text/javascript">
+        var stompClient = null;
+
+        function setConnected(connected) {
+            document.getElementById('connect').disabled = connected;
+            document.getElementById('disconnect').disabled = !connected;
+            document.getElementById('start').disabled = !connected;
+            document.getElementById('stop').disabled = !connected;
+            document.getElementById('conversation').style.visibility = connected ? 'visible' : 'hidden';
+            document.getElementById('response').innerHTML = '';
+        }
+
+        function connect(input, subscribeTopic) {
+            let socket = new SockJS(input);
+            stompClient = Stomp.over(socket);
+
+            stompClient.connect({}, function (frame) {
+                setConnected(true);
+
+                console.log('Connected: ' + frame);
+
+                stompClient.subscribe(subscribeTopic, function (input) {
+                    showResults(JSON.parse(input.body));
+                });
+            });
+        }
+
+        function disconnect() {
+            stompClient.disconnect();
+
+            setConnected(false);
+
+            console.log("Disconnected");
+        }
+
+        function send() {
+            var startUrl = document.getElementById('startUrl').value;
+            var maxThreads = document.getElementById('maxThreads').value;
+            var searchText = document.getElementById('searchText').value;
+            var maxCountScanUrl = document.getElementById('maxCountScanUrl').value;
+
+            stompClient.send("/app/input", {}, JSON.stringify({
+                'startUrl': startUrl,
+                'maxThreads': maxThreads,
+                'searchText': searchText,
+                'maxCountScanUrl': maxCountScanUrl
+            }));
+        }
+
+        function sendStatus(status) {
+            stompClient.send("/app/flag", {}, JSON.stringify({
+                'processStatus': status
+            }));
+        }
+
+        function start(start) {
+            clearResults();
+
+            sendStatus(true);
+            send();
+
+            document.getElementById('start').disabled = !start;
+            document.getElementById('stop').disabled = start;
+        }
+
+        function stop(stop) {
+            sendStatus(false);
+
+            document.getElementById('start').disabled = stop;
+            document.getElementById('stop').disabled = !stop;
+        }
+
+        function showResults(input) {
+            var result = $('#result').html();
+            var resultHtml = $('<li>' + result + '</li>');
+
+            var resultUrl = $('.url', resultHtml);
+            resultUrl.html(input.url);
+
+            var resultSearchStatus = $('.searchStatus', resultHtml);
+            resultSearchStatus.html(input.searchStatus);
+
+            var resultDescriptionError = $('.descriptionError', resultHtml);
+            resultDescriptionError.html(input.descriptionError);
+
+            $('#response').append(resultHtml);
+        }
+
+        function clearResults() {
+            $('#response').html("");
+        }
+    </script>
+</head>
+<body>
+<div>
+    <div>
+        <button id="connect" onclick="connect('/input', '/topic/results'); connect('/flag', null);">Connect</button>
+        <button id="disconnect" disabled="disabled" onclick="disconnect(); ">Disconnect</button>
+    </div>
+    <div id="conversation">
+        <table>
+            <tbody>
+            <tr>
+                <td><label>Start URL:<input type="text" id="startUrl"/></label></td>
+            </tr>
+            <tr>
+                <td><label>Max Threads:<input type="text" id="maxThreads"/></label></td>
+            </tr>
+            <tr>
+                <td><label>Search Text:<input type="text" id="searchText"/></label></td>
+            </tr>
+            <tr>
+                <td><label>Max Count Scan Url:<input type="text" id="maxCountScanUrl"/></label></td>
+            </tr>
+            </tbody>
+        </table>
+
+        <div>
+            <button id="start" disabled="disabled" onclick="start()">Start</button>
+            <button id="stop" disabled="disabled" onclick="stop();">Stop</button>
+        </div>
+        <ul id="response"></ul>
+        <div class="templates">
+            <div id="result">
+                <div class="row">
+                    <table>
+                        <tr>
+                            <td>
+                                <div class="url"></div>
+                            </td>
+                            <td>
+                                <div class="searchStatus"></div>
+                            </td>
+                            <td>
+                                <div class="descriptionError"></div>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
