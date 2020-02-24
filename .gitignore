@@ -1,3 +1,10 @@
+HELP.md
+.gradle
+build/
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**
+!**/src/test/**
+
 ### STS ###
 .apt_generated
 .classpath
@@ -9,26 +16,16 @@
 
 ### IntelliJ IDEA ###
 .idea
+.idea/gradle.xml
 *.iws
 *.iml
 *.ipr
 out/
-
-### NetBeans ###
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
-
-### VS Code ###
-.vscode/
-.gitignore
-build.gradle
-gradle/
-gradlew
-gradlew.bat
-settings.gradle
-src/
 .gradle/
-build/
+.idea/.gitignore
+.idea/compiler.xml
+.idea/jarRepositories.xml
+.idea/misc.xml
+.idea/modules/
+.idea/sonarlint/
+.idea/vcs.xml
